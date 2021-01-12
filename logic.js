@@ -26,7 +26,7 @@ function display(libraryArray) {
   while (displayDiv.childElementCount > 0) {
     displayDiv.firstChild.remove();
   }
-  libraryArray.forEach((obj) => {
+  libraryArray.forEach((obj, index) => {
     let cardBody = document.createElement("div");
     cardBody.classList.add("card-body", "d-flex", "flex-column");
     let cardTitle = document.createElement("h5");
@@ -36,8 +36,12 @@ function display(libraryArray) {
     let cardNum = document.createElement("h6");
     cardNum.classList.add("card-text", "text-muted");
     let readBtn = document.createElement("button");
-    readBtn.classList.add("btn", "btn-danger", "self-align-center");
+    readBtn.classList.add("btn", "btn-primary", "self-align-start", "read");
     readBtn.innerText = "READ";
+    let deleteBtn = document.createElement("btn");
+    deleteBtn.classList.add("btn", "btn-danger", "self-align-end", "delete");
+    deleteBtn.setAttribute("data-index", index);
+    deleteBtn.innerText = "Delete";
     for (let key in obj) {
       console.log(key);
       console.log(obj[key]);
@@ -53,6 +57,7 @@ function display(libraryArray) {
       }
     }
     cardBody.appendChild(readBtn);
+    cardBody.appendChild(deleteBtn);
     let cardDiv = document.createElement("div");
     cardDiv.classList.add(
       "card",
@@ -64,6 +69,16 @@ function display(libraryArray) {
     cardDiv.appendChild(cardBody);
     displayDiv.appendChild(cardDiv);
   });
+}
+// removes object by targeting where the object is stored in the arrary
+function removeObj(arr, target) {
+  if (target == 0) {
+    arr.shift();
+  } else if (target == arr.length - 1) {
+    arr.pop();
+  } else {
+    arr.splice(target, 1);
+  }
 }
 
 saveBookBtn.addEventListener("click", (e) => {
@@ -82,6 +97,14 @@ saveBookBtn.addEventListener("click", (e) => {
   author.value = "";
   numPages.value = "";
   readCheckbox.checked = false;
+});
+
+displayDiv.addEventListener("click", (e) => {
+  if ((e.target.ClassName = "delete")) {
+    let target = e.target.getAttribute("data-index");
+    removeObj(myLibrary, target);
+    display(myLibrary);
+  }
 });
 
 // //  function adds book objects to myLibrary array
