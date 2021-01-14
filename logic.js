@@ -14,7 +14,7 @@ class Book {
   constructor(title, author, num, read) {
     this.title = title;
     this.author = author;
-    this.num = num;
+    this.num = num + " pages";
     this.read = read;
   }
   addToLibrary() {
@@ -29,18 +29,17 @@ function display(libraryArray) {
   libraryArray.forEach((obj, index) => {
     let cardBody = document.createElement("div");
     cardBody.classList.add("card-body", "d-flex", "flex-column");
+    cardBody.setAttribute("data-index", index);
     let cardTitle = document.createElement("h5");
-    cardTitle.classList.add("card-title");
+    cardTitle.classList.add("card-title", "display-5");
     let cardAuthor = document.createElement("h5");
     cardAuthor.classList.add("card-text");
     let cardNum = document.createElement("h6");
     cardNum.classList.add("card-text", "text-muted");
     let readBtn = document.createElement("button");
-    readBtn.classList.add("btn", "btn-primary", "self-align-start", "read");
-    readBtn.innerText = "READ";
+    readBtn.classList.add("btn", "read");
     let deleteBtn = document.createElement("btn");
-    deleteBtn.classList.add("btn", "btn-danger", "self-align-end", "delete");
-    deleteBtn.setAttribute("data-index", index);
+    deleteBtn.classList.add("btn", "btn-danger", "delete");
     deleteBtn.innerText = "Delete";
     for (let key in obj) {
       console.log(key);
@@ -54,6 +53,16 @@ function display(libraryArray) {
       } else if (key == "num") {
         cardNum.innerText = obj[key];
         cardBody.appendChild(cardNum);
+      } else if (key == "read") {
+        switch (obj[key]) {
+          case true:
+            readBtn.classList.add("btn-success"), (readBtn.innerText = "READ");
+            break;
+          case false:
+            readBtn.classList.add("btn-danger"),
+              (readBtn.innerText = "NOT READ");
+            break;
+        }
       }
     }
     cardBody.appendChild(readBtn);
@@ -86,6 +95,8 @@ saveBookBtn.addEventListener("click", (e) => {
   myLibrary.push(
     new Book(title.value, author.value, numPages.value, readCheckbox.checked)
   );
+  //store myLibrary in localStorage
+  storeLocal();
   //display
   display(myLibrary);
   // close modal
@@ -100,87 +111,35 @@ saveBookBtn.addEventListener("click", (e) => {
 });
 
 displayDiv.addEventListener("click", (e) => {
-  if ((e.target.ClassName = "delete")) {
-    let target = e.target.getAttribute("data-index");
+  if (e.target.classList.contains("delete")) {
+    let target = e.target.parentNode.getAttribute("data-index");
     removeObj(myLibrary, target);
+    storeLocal();
+    display(myLibrary);
+  } else if (e.target.classList.contains("read")) {
+    let obj = myLibrary[e.target.parentNode.getAttribute("data-index")];
+    if (e.target.innerText == "READ") {
+      obj.read = false;
+    } else {
+      obj.read = true;
+    }
+    storeLocal();
     display(myLibrary);
   }
 });
 
-// //  function adds book objects to myLibrary array
-// function addBookToLibrary(title, author) {
-//   myLibrary.push(new Book(title, author));
-//   displayBooks();
-// }
-// // function displays each book object inside HTML.
-// let body = document.querySelector("body");
-// let table = document.querySelector("table");
+function storeLocal() {
+  localStorage.setItem("myLibrary", JSON.stringify(myLibrary));
+}
 
-// function displayBooks() {
-//   // loop clears elements from previous iteration of the function
-//   while (table.childElementCount > 1) {
-//     table.lastChild.remove();
-//   }
+function retrieveLocal() {
+  if (!localStorage.getItem("myLibrary")) {
+    display(myLibrary);
+  } else {
+    let libraryArrary = localStorage.getItem("myLibrary");
+    myLibrary = JSON.parse(libraryArrary);
+    display(myLibrary);
+  }
+}
 
-//   myLibrary.forEach(function (obj, index) {
-//     let row = document.createElement("tr");
-//     for (let y in obj) {
-//       let tdata = document.createElement("td");
-//       tdata.textContent = obj[y];
-//       row.appendChild(tdata);
-//     }
-//     let delBtn = document.createElement("button");
-//     delBtn.innerText = "delete";
-//     delBtn.classList.add("delete");
-//     delBtn.setAttribute("data-library-index", index);
-//     row.appendChild(delBtn);
-//     table.appendChild(row);
-//   });
-// }
-
-// let newBook = document.querySelector("#new-book");
-// let form = document.querySelector("form");
-// // newBook button toggles visibility of form element
-
-// newBook.addEventListener("click", function (e) {
-//   form.classList.toggle("visible");
-// });
-
-// let bookTitle = document.querySelector("#title");
-// let bookAuthor = document.querySelector("#author");
-// let submitButton = document.querySelector("#submit");
-// // eventlistener adds newly submitted book object to table
-
-// submitButton.addEventListener("click", function (e) {
-//   if (bookTitle.value != "" && bookAuthor.value != "") {
-//     addBookToLibrary(bookTitle.value, bookAuthor.value);
-//     // displayBooks();
-//     // add eventlisteners to delete buttons
-//     // deleteBtn = document.querySelectorAll(".delete");
-//     addDelEvent();
-//   }
-// });
-
-// function addDelEvent() {
-//   // let deleteBtn = document.querySelectorAll(".delete");
-//   let table = document.querySelector("table");
-//   table.addEventListener("click", function (e) {
-//     if (e.target.classList.contains("delete")) {
-//       let target = e.target.getAttribute("data-library-index");
-//       console.log(target);
-//       removeEl(myLibrary, target);
-//       // displayBooks();
-//     }
-//   });
-// }
-
-// // function removes elements from array
-// function removeEl(arr, target) {
-//   if (target == 0) {
-//     arr.shift();
-//   } else if (target == arr.length - 1) {
-//     arr.pop();
-//   } else {
-//     arr.splice(target, 1);
-//   }
-// }
+retrieveLocal();
